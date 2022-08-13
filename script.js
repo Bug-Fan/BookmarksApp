@@ -7,16 +7,19 @@ let localBookMarks = [];
 bookmarkForm.style.position = 'relative';
 bookmarkForm.querySelector('.modal').style.marginLeft = bookmarkForm.querySelector('.modal').style.marginRight = '30%';
 
-const createNewBookMark = function () {    
-    let flag = 0;
-    event.preventDefault();
+const createNewBookMark = function () {   
 
+    event.preventDefault();
+    
+    let flag = 0;
     const siteName = document.querySelector("#website-name").value;
     let siteAddress = document.querySelector("#website-url").value;
 
     if (siteName === '' || siteAddress === ''){
+    
         alert("Please enter complete data.");
         return;
+
     }
 
     if (siteAddress.includes('https://'))
@@ -25,13 +28,23 @@ const createNewBookMark = function () {
         siteAddress = `https://${siteAddress}`;
     
     for (item of localBookMarks){
-        if (item[0] === siteName){
+        
+        if (Object.keys(JSON.parse(item))[0] === siteName){
+        
             flag = 1;
             break;
+        
         }
+    
     }
-    if (flag !== 1)
-        localStorage.setItem(siteName, siteAddress);
+    if (flag !== 1){
+
+        let newObj = new Object();
+        newObj[`${siteName}`] = siteAddress;
+        localBookMarks.push(JSON.stringify(newObj))
+        localStorage.setItem("bookmarkApp", localBookMarks);
+    
+    }
     else 
         alert(`${siteName} already exists!`);
 
@@ -43,25 +56,44 @@ const showBookMarks = function (element, container) {
 
     const newBookmark = document.createElement('div');
     newBookmark.className = 'item';
-    newBookmark.innerHTML = `<center><h3><a href="${element[1]}" target="_blank">${element[0]}</a></h3></center><br><button onclick="deleteBookMark('${element[0]}')">Delete</button>`;
+    newBookmark.innerHTML = `<center><h3><a href="${Object.values(element)}" target="_blank">${Object.keys(element)}</a></h3></center><br><button onclick="deleteBookMark('${Object.keys(element)}')">Delete</button>`;
     container.append(newBookmark);
-
 }
 
 const displayAllBookMarks = function () {
-    
-    const container = document.querySelector(".container");
-    localBookMarks = Array.from(Object.entries(localStorage));
 
-    localBookMarks.forEach(element => {
-        showBookMarks(element, container);
-    });;
+    if (localStorage.bookmarkApp === undefined){
+        
+        localStorage.setItem('bookmarkApp', '');
+        return;
+
+    }
+
+    if (localStorage.bookmarkApp === '')
+        console.log("No bookarks available");
+    
+    else {
+
+        const container = document.querySelector(".container");
+        localBookMarks = localStorage.bookmarkApp.split(',');
+        
+        localBookMarks.forEach(element => {
+            showBookMarks(JSON.parse(element), container);
+        });
+
+    }
+
 }
 
 const deleteBookMark = function () {
 
-    localStorage.removeItem(arguments[0]);
+    for (item of localBookMarks)
+        if (Object.keys(JSON.parse(item))[0] === arguments[0])
+            localBookMarks.splice(localBookMarks.indexOf(JSON.parse(item)), 1);
+    
+    localStorage.setItem('bookmarkApp', localBookMarks);
     alert(`${arguments[0]} deleted!`);
+
     location.reload();
 
 }
