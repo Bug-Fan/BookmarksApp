@@ -89,7 +89,7 @@ const deleteBookMark = function () {
 
     for (item of localBookMarks)
         if (Object.keys(JSON.parse(item))[0] === arguments[0])
-            localBookMarks.splice(localBookMarks.indexOf(JSON.parse(item)), 1);
+            localBookMarks.splice(localBookMarks.indexOf(item), 1);
     
     localStorage.setItem('bookmarkApp', localBookMarks);
     alert(`${arguments[0]} deleted!`);
